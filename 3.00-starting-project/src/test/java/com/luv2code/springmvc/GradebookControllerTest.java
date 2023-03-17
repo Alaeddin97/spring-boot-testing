@@ -1,9 +1,8 @@
 package com.luv2code.springmvc;
 
-import com.luv2code.springmvc.controller.GradebookController;
 import com.luv2code.springmvc.models.CollegeStudent;
 import com.luv2code.springmvc.models.GradebookCollegeStudent;
-import com.luv2code.springmvc.repositories.StudentDAO;
+import com.luv2code.springmvc.repositories.StudentDao;
 import com.luv2code.springmvc.services.StudentAndGradeService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -48,24 +47,24 @@ public class GradebookControllerTest {
     private StudentAndGradeService studentService;
 
     @Autowired
-    StudentDAO studentDAO;
+    StudentDao studentDAO;
 
     @BeforeAll
     static void beforeAll() {
         request = new MockHttpServletRequest();
-        request.setParameter("firstname", "Chad");
-        request.setParameter("lastname", "Darby");
-        request.setParameter("emailAddress", "chad_darby@luv2code_school.com");
+        request.setParameter("firstname", "John");
+        request.setParameter("lastname", "Doe");
+        request.setParameter("emailAddress", "jhon.doe@luv2code_school.com");
     }
 
     @BeforeEach
-    private void beforeEach() {
+    public void beforeEach() {
         jdbcTemplate.execute("insert into student (id,firstName,lastName,email_address)" +
-                "values(1,'chad','darby','chad.darby@luv2code_school.com')");
+                "values(1,'Chad','Darby','chad.darby@luv2code_school.com')");
     }
 
     @AfterEach
-    private void afterEach() {
+    public void afterEach() {
         jdbcTemplate.execute("DELETE FROM student");
     }
 
@@ -94,7 +93,7 @@ public class GradebookControllerTest {
                 .param("emailAddress", request.getParameterValues("emailAddress"))
         ).andExpect(status().isOk()).andReturn();
         ModelAndView modelAndView = mvcResult.getModelAndView();
-        CollegeStudent student = studentDAO.findByEmailAddress("chad_darby@luv2code_school.com");
+        CollegeStudent student = studentDAO.findByEmailAddress("jhon.doe@luv2code_school.com");
 
         ModelAndViewAssert.assertViewName(modelAndView, "index");
         assertNotNull(student);
@@ -103,22 +102,22 @@ public class GradebookControllerTest {
     @Test
     public void deleteStudent() throws Exception {
         assertTrue(studentDAO.findById(1).isPresent());
-        MvcResult mvcResult=this.mockMvc.perform(MockMvcRequestBuilders
-                .get("/delete/student/"+1))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/delete/student/" + 1))
                 .andExpect(status().isOk()).andReturn();
-        ModelAndView modelAndView=mvcResult.getModelAndView();
-        ModelAndViewAssert.assertViewName(modelAndView,"index");
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        ModelAndViewAssert.assertViewName(modelAndView, "index");
 
         assertFalse(studentDAO.findById(1).isPresent());
     }
 
     @Test
     public void deleteStudentErrorPage() throws Exception {
-        MvcResult mvcResult=this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/delete/student/"+0))
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders
+                        .get("/delete/student/" + 3))
                 .andExpect(status().isOk()).andReturn();
-        ModelAndView modelAndView=mvcResult.getModelAndView();
-        ModelAndViewAssert.assertViewName(modelAndView,"error");
+        ModelAndView modelAndView = mvcResult.getModelAndView();
+        ModelAndViewAssert.assertViewName(modelAndView, "error");
     }
 
 }
