@@ -2,6 +2,7 @@ package com.luv2code.springmvc;
 
 import com.luv2code.springmvc.models.CollegeStudent;
 import com.luv2code.springmvc.models.GradebookCollegeStudent;
+import com.luv2code.springmvc.repositories.MathGradesDao;
 import com.luv2code.springmvc.repositories.StudentDao;
 import com.luv2code.springmvc.services.StudentAndGradeService;
 import org.junit.jupiter.api.AfterEach;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -28,6 +30,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @TestPropertySource("/application.properties")
@@ -36,18 +39,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class GradebookControllerTest {
 
     private static MockHttpServletRequest request;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
     private MockMvc mockMvc;
-
-    @Mock
-    private StudentAndGradeService studentService;
-
     @Autowired
-    StudentDao studentDAO;
+    private StudentAndGradeService studentService;
+    @Mock
+    private StudentAndGradeService studentCreateServiceMock;
+    @Autowired
+    StudentDao studentDao;
+    @Value("${sql.script.create.student}")
+    private String sqlAddStudent;
+
+    @Value("${sql.script.create.math.grade}")
+    private String sqlAddMathGrade;
+
+    @Value("${sql.script.create.science.grade}")
+    private String sqlAddScienceGrade;
+
+    @Value("${sql.script.create.history.grade}")
+    private String sqlAddHistoryGrade;
+
+    @Value("${sql.script.delete.student}")
+    private String sqlDeleteStudent;
+
+    @Value("${sql.script.delete.math.grade}")
+    private String sqlDeleteMathGrade;
+
+    @Value("${sql.script.delete.science.grade}")
+    private String sqlDeleteScienceGrade;
+
+    @Value("${sql.script.delete.history.grade}")
+    private String sqlDeleteHistoryGrade;
+
 
     @BeforeAll
     static void beforeAll() {
@@ -59,13 +84,10 @@ public class GradebookControllerTest {
 
     @BeforeEach
     public void beforeEach() {
-        jdbcTemplate.execute("insert into student (id,firstName,lastName,email_address)" +
-                "values(1,'Chad','Darby','chad.darby@luv2code_school.com')");
-    }
-
-    @AfterEach
-    public void afterEach() {
-        jdbcTemplate.execute("DELETE FROM student");
+        jdbcTemplate.execute(sqlAddStudent);
+        jdbcTemplate.execute(sqlAddMathGrade);
+        jdbcTemplate.execute(sqlAddScienceGrade);
+        jdbcTemplate.execute(sqlAddHistoryGrade);
     }
 
     @Test
@@ -75,8 +97,10 @@ public class GradebookControllerTest {
         CollegeStudent studentTwo = new GradebookCollegeStudent("Chad", "Darby",
                 "chad_darby@luv2code_school.com");
         List<CollegeStudent> students = new ArrayList<>(Arrays.asList(studentOne, studentTwo));
-        when(studentService.getGradeBook()).thenReturn(students);
-        assertIterableEquals(studentService.getGradeBook(), students);
+
+        when(studentCreateServiceMock.getGradeBook()).thenReturn(students);
+        assertIterableEquals(studentCreateServiceMock.getGradeBook(), students);
+
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/"))
                 .andExpect(status().isOk()).andReturn();
         ModelAndView modelAndView = mvcResult.getModelAndView();
@@ -92,8 +116,9 @@ public class GradebookControllerTest {
                 .param("lastname", request.getParameterValues("lastname"))
                 .param("emailAddress", request.getParameterValues("emailAddress"))
         ).andExpect(status().isOk()).andReturn();
+
         ModelAndView modelAndView = mvcResult.getModelAndView();
-        CollegeStudent student = studentDAO.findByEmailAddress("jhon.doe@luv2code_school.com");
+        CollegeStudent student = studentDao.findByEmailAddress("jhon.doe@luv2code_school.com");
 
         ModelAndViewAssert.assertViewName(modelAndView, "index");
         assertNotNull(student);
@@ -101,14 +126,14 @@ public class GradebookControllerTest {
 
     @Test
     public void deleteStudent() throws Exception {
-        assertTrue(studentDAO.findById(1).isPresent());
+        assertTrue(studentDao.findById(1).isPresent());
         MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/delete/student/" + 1))
                 .andExpect(status().isOk()).andReturn();
         ModelAndView modelAndView = mvcResult.getModelAndView();
         ModelAndViewAssert.assertViewName(modelAndView, "index");
 
-        assertFalse(studentDAO.findById(1).isPresent());
+        assertFalse(studentDao.findById(1).isPresent());
     }
 
     @Test
@@ -120,4 +145,88 @@ public class GradebookControllerTest {
         ModelAndViewAssert.assertViewName(modelAndView, "error");
     }
 
+    @Test
+    public void studentInformationHTTPRequest() throws Exception {
+        assertNotNull(studentDao.findById(1));
+
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/studentInformation/1"))
+                .andExpect(status().isOk()).andReturn();
+
+        ModelAndView mav = mvcResult.getModelAndView();
+        ModelAndViewAssert.assertViewName(mav, "studentInformation");
+    }
+
+    @Test
+    public void studentInformationHTTPStudentDoesNotExistRequest() throws Exception {
+        MvcResult mvcResult = this.mockMvc.perform(MockMvcRequestBuilders.get("/studentInformation/5"))
+                .andExpect(status().isOk()).andReturn();
+
+        ModelAndView mav = mvcResult.getModelAndView();
+        ModelAndViewAssert.assertViewName(mav, "error");
+    }
+
+    @Test
+    public void createValidGradeHTTPRequest() throws Exception {
+        assertTrue(studentDao.findById(1).isPresent());
+        GradebookCollegeStudent student = studentService.studentInformation(1);
+
+        assertEquals(1, student.getStudentGrades().getMathGradeResults().size());
+
+        MvcResult mvcResult = this.mockMvc.perform(post("/grades")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param("grade", "85.00")
+                .param("gradeType", "MATH")
+                .param("studentId", "1")).andExpect(status().isOk()).andReturn();
+
+        ModelAndView mav = mvcResult.getModelAndView();
+
+        ModelAndViewAssert.assertViewName(mav, "studentInformation");
+
+        student = studentService.studentInformation(1);
+
+        assertEquals(2, student.getStudentGrades().getMathGradeResults().size());
+    }
+
+
+
+
+
+
+
+    @AfterEach
+    public void afterEach() {
+        jdbcTemplate.execute(sqlDeleteStudent);
+        jdbcTemplate.execute(sqlDeleteMathGrade);
+        jdbcTemplate.execute(sqlDeleteScienceGrade);
+        jdbcTemplate.execute(sqlDeleteHistoryGrade);
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
