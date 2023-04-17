@@ -69,4 +69,10 @@
 		</plugins>
 	</build>
 
+	<profiles>
+	<profile>
+	<id>tester</id>
+	</profile>
+	</profiles>
+
 </project>

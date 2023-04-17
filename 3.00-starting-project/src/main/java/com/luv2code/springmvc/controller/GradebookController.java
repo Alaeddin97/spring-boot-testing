@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class GradebookController {
@@ -35,14 +36,16 @@ public class GradebookController {
 	}
 
 	@RequestMapping(value = "/delete/student/{id}", method = RequestMethod.GET)
-		public String deleteStudent(@PathVariable int id,Model m){
+		public ModelAndView deleteStudent(@PathVariable int id, ModelAndView m){
 		if(studentService.checkIfStudentIsNull(id)){
 		studentService.deleteStudent(id);
 		Iterable<CollegeStudent>students=studentService.getGradeBook();
-		m.addAttribute("students",students);
-		return "index";
+		m.addObject("students",students);
+		m.setViewName("index");
+		return m;
 		}
-		return "error";
+		m.setViewName("error");
+		return m;
 	}
 
 	@GetMapping("/studentInformation/{id}")

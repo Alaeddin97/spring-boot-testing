@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Scope;
 
 @SpringBootApplication
 public class MvcTestingExampleApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(MvcTestingExampleApplication.class, args);
 	}

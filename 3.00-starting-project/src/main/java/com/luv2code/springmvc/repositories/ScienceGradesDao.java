@@ -6,8 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
-public interface ScienceGradesDao extends CrudRepository<ScienceGrade,Integer> {
+public interface ScienceGradesDao extends CrudRepository<ScienceGrade, Integer> {
     List<Grade> findGradeByStudentId(int i);
-
     void deleteByStudentId(int studentId);
 }

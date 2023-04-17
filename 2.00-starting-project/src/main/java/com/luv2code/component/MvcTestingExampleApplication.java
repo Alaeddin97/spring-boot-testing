@@ -13,10 +13,10 @@ public class MvcTestingExampleApplication {
 		SpringApplication.run(MvcTestingExampleApplication.class, args);
 	}
 
-	/*@Bean(name = "collegeStudent")
+	@Bean(name = "collegeStudent")
 	@Scope(value = "prototype")
 	CollegeStudent getCollegeStudent() {
 		return new CollegeStudent();
-	}*/
+	}
 
 }

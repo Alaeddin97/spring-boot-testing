@@ -1,5 +1,6 @@
 package com.luv2code.springmvc.models;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -8,7 +9,6 @@ import java.util.List;
 
 @Component
 public class StudentGrades {
-
     private List<Grade> mathGradeResults;
 
     private List<Grade> scienceGradeResults;

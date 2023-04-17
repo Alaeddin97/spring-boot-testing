@@ -2,9 +2,8 @@ package com.luv2code.component.models;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-@Scope(value = "prototype")
-@Component
+//@Scope(value = "prototype")
+//@Component
 public class CollegeStudent implements Student {
     private String firstname;
     private String lastname;

@@ -3,11 +3,11 @@ package com.luv2code.component.service;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.luv2code.component.dao.ApplicationDao;
+import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 
 public class ApplicationService {
-
     @Autowired
     private ApplicationDao applicationDao;
 
