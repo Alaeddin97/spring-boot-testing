@@ -205,7 +205,6 @@ public class GradebookControllerTest {
 
     @Test
     public void createValidGradeHttpRequest() throws Exception {
-
         assertTrue(studentDao.findById(1).isPresent());
 
         GradebookCollegeStudent student = studentService.studentInformation(1);

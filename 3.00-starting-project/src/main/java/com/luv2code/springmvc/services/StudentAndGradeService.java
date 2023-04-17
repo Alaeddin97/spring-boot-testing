@@ -9,6 +9,7 @@ import com.luv2code.springmvc.utils.GradeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -70,25 +71,25 @@ public class StudentAndGradeService {
         return studentDao.findAll();
     }
 
-    public boolean createGrade(double grade, int id, GradeType type) {
-        if (!checkIfStudentIsNull(id))
+    public boolean createGrade(double grade, int studentId, GradeType type) {
+        if (!checkIfStudentIsNull(studentId))
             return false;
         if (type == GradeType.MATH) {
             mathGrade.setId(0);
             mathGrade.setGrade(grade);
-            mathGrade.setStudentId(id);
+            mathGrade.setStudentId(studentId);
             mathGradeDao.save(mathGrade);
             return true;
         } else if (type == GradeType.SCIENCE) {
             scienceGrade.setId(0);
             scienceGrade.setGrade(grade);
-            scienceGrade.setStudentId(id);
+            scienceGrade.setStudentId(studentId);
             scienceGradeDao.save(scienceGrade);
             return true;
         } else if (type == GradeType.HISTORY) {
             historyGrade.setId(0);
             historyGrade.setGrade(grade);
-            historyGrade.setStudentId(id);
+            historyGrade.setStudentId(studentId);
             historyGradeDao.save(historyGrade);
             return true;
         }
@@ -123,18 +124,23 @@ public class StudentAndGradeService {
         return studentId;
     }
 
-    public GradebookCollegeStudent studentInformation(int id) {
-        if(!checkIfStudentIsNull(id))
+    public GradebookCollegeStudent studentInformation(int studentId) {
+        if(!checkIfStudentIsNull(studentId)) {
             return null;
-        Optional<CollegeStudent> collegeStudent = studentDao.findById(id);
-        List<Grade> mathGrades = mathGradeDao.findGradeByStudentId(id);
-        List<Grade> scienceGrades = scienceGradeDao.findGradeByStudentId(id);
-        List<Grade> historyGrades = historyGradeDao.findGradeByStudentId(id);
+        }else{
+        Optional<CollegeStudent> collegeStudent = studentDao.findById(studentId);
+            System.out.println(collegeStudent);
+        List<Grade> mathGrades = mathGradeDao.findGradeByStudentId(studentId);
+            System.out.println(mathGrades);
+        List<Grade> scienceGrades = scienceGradeDao.findGradeByStudentId(studentId);
+            System.out.println(scienceGrades);
+        List<Grade> historyGrades = historyGradeDao.findGradeByStudentId(studentId);
+            System.out.println(historyGrades);
         StudentGrades studentGrades=new StudentGrades();
         studentGrades.setMathGradeResults((mathGrades));
         studentGrades.setScienceGradeResults(scienceGrades);
         studentGrades.setHistoryGradeResults(historyGrades);
-        GradebookCollegeStudent gradebookCollegeStudent=  new GradebookCollegeStudent(
+        GradebookCollegeStudent gradebookCollegeStudent = new GradebookCollegeStudent(
                 collegeStudent.get().getId(),
                 collegeStudent.get().getFirstname(),
                 collegeStudent.get().getLastname(),
@@ -142,6 +148,37 @@ public class StudentAndGradeService {
                 studentGrades
         );
         return gradebookCollegeStudent;
+        }
+    }
+
+    public void configureStudentInformationModel(int studentId, Model m){
+        GradebookCollegeStudent studentEntity = studentInformation(studentId);
+        m.addAttribute("student", studentEntity);
+
+        if (studentEntity.getStudentGrades().getMathGradeResults().size() > 0) {
+            m.addAttribute("mathAverage", studentEntity.getStudentGrades().findGradePointAverage(
+                    studentEntity.getStudentGrades().getMathGradeResults()
+            ));
+        } else {
+            m.addAttribute("mathAverage", "N/A");
+        }
+
+        if (studentEntity.getStudentGrades().getScienceGradeResults().size() > 0) {
+            m.addAttribute("scienceAverage", studentEntity.getStudentGrades().findGradePointAverage(
+                    studentEntity.getStudentGrades().getScienceGradeResults()
+            ));
+        } else {
+            m.addAttribute("scienceAverage", "N/A");
+        }
+
+        if (studentEntity.getStudentGrades().getHistoryGradeResults().size() > 0) {
+            m.addAttribute("scienceAverage", studentEntity.getStudentGrades().findGradePointAverage(
+                    studentEntity.getStudentGrades().getHistoryGradeResults()
+            ));
+        } else {
+            m.addAttribute("scienceAverage", "N/A");
+        }
+
     }
 }
 

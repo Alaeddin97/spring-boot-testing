@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -62,21 +63,37 @@ public class StudentAndGradeServiceTest {
     @Qualifier("historyGrades")
     private HistoryGrade historyGrades;
 
+    @Value("${sql.script.create.student}")
+    private String sqlAddStudent;
+    @Value("${sql.script.create.math.grade}")
+    private String sqlAddMathGrade;
+    @Value("${sql.script.create.science.grade}")
+    private String sqlAddScienceGrade;
+    @Value("${sql.script.create.history.grade}")
+    private String sqlAddHistoryGrade;
+    @Value("${sql.script.delete.student}")
+    private String sqlDeleteStudent;
+    @Value("${sql.script.delete.math.grade}")
+    private String sqlDeleteMathGrade;
+    @Value("${sql.script.delete.science.grade}")
+    private String sqlDeleteScienceGrade;
+    @Value("${sql.script.delete.history.grade}")
+    private String sqlDeleteHistoryGrade;
+
     @BeforeEach
     public void beforeEach() {
-        jdbcTemplate.execute("insert into student (id,firstName,lastName,email_address) " +
-                "values(1,'Chad','Darby','chad.darby@luv2code_school.com')");
-        jdbcTemplate.execute("insert into math_grade (id,student_id,grade) values(1,1,77.5)");
-        jdbcTemplate.execute("insert into science_grade (id,student_id,grade) values(1,1,87.5)");
-        jdbcTemplate.execute("insert into history_grade (id,student_id,grade) values(1,1,97.5)");
+        jdbcTemplate.execute(sqlAddStudent);
+        jdbcTemplate.execute(sqlAddMathGrade);
+        jdbcTemplate.execute(sqlAddScienceGrade);
+        jdbcTemplate.execute(sqlAddHistoryGrade);
     }
 
     @AfterEach
     public void afterEach() {
-        jdbcTemplate.execute("DELETE FROM student");
-        jdbcTemplate.execute("DELETE FROM math_grade");
-        jdbcTemplate.execute("DELETE FROM science_grade");
-        jdbcTemplate.execute("DELETE FROM history_grade");
+        jdbcTemplate.execute(sqlDeleteStudent);
+        jdbcTemplate.execute(sqlDeleteMathGrade);
+        jdbcTemplate.execute(sqlDeleteScienceGrade);
+        jdbcTemplate.execute(sqlDeleteHistoryGrade);
     }
 
     @Test
@@ -200,10 +217,17 @@ public class StudentAndGradeServiceTest {
 
         assertNotNull(gradebookCollegeStudent);
         assertEquals(gradebookCollegeStudent.getId(),1);
+<<<<<<< HEAD
         assertEquals(gradebookCollegeStudent.getFirstname(),"Chad");
         assertEquals(gradebookCollegeStudent.getLastname(),"Darby");
         assertEquals(gradebookCollegeStudent.getEmailAddress(),"chad.darby@luv2code_school.com");
        /* assertEquals(1, gradebookCollegeStudent.getStudentGrades().getMathGradeResults().size());
+=======
+        assertEquals(gradebookCollegeStudent.getFirstname(),"Eric");
+        assertEquals(gradebookCollegeStudent.getLastname(),"Roby");
+        assertEquals(gradebookCollegeStudent.getEmailAddress(),"eric.roby@luv2code_school.com");
+        assertEquals(1, gradebookCollegeStudent.getStudentGrades().getMathGradeResults().size());
+>>>>>>> c59c0c88f3cc543bfd66ea1bded6d36f59b14b32
         assertEquals(1, gradebookCollegeStudent.getStudentGrades().getScienceGradeResults().size());
         assertEquals(1, gradebookCollegeStudent.getStudentGrades().getHistoryGradeResults().size());*/
 
